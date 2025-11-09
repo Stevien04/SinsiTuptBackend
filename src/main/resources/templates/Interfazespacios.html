@@ -235,6 +235,137 @@
                 font-size: 0.85rem;
             }
         }
+         .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 2rem;
+        }
+
+        @media (min-width: 1080px) {
+            .layout {
+                grid-template-columns: 2fr 1fr;
+                align-items: start;
+            }
+        }
+
+        .reservation-panel {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 1.8rem;
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(37, 99, 235, 0.12);
+        }
+
+        .reservation-panel[hidden] {
+            display: none;
+        }
+
+        .reservation-panel h2 {
+            margin-top: 0;
+            color: #1d4ed8;
+            font-size: 1.35rem;
+        }
+
+        .reservation-panel form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .reservation-panel label {
+            display: flex;
+            flex-direction: column;
+            font-weight: 600;
+            color: #0f172a;
+            gap: 0.45rem;
+        }
+
+        .reservation-panel input,
+        .reservation-panel textarea,
+        .reservation-panel button {
+            font: inherit;
+            padding: 0.6rem 0.75rem;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            background: white;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .reservation-panel input:focus,
+        .reservation-panel textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .reservation-panel button {
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+            border: none;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.4rem;
+        }
+
+        .reservation-panel button:hover {
+            filter: brightness(1.05);
+        }
+
+        .reservation-panel .seleccion {
+            margin: 0 0 1rem;
+            padding: 0.85rem 1rem;
+            border-left: 4px solid #2563eb;
+            background-color: #e0f2fe;
+            border-radius: 8px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .reservation-panel .resultado {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .reservation-panel .resultado.exito {
+            background-color: #ecfdf5;
+            border: 1px solid #34d399;
+            color: #065f46;
+        }
+
+        .reservation-panel .resultado.error {
+            background-color: #fef2f2;
+            border: 1px solid #f87171;
+            color: #991b1b;
+        }
+
+        tbody tr {
+            cursor: pointer;
+        }
+
+        tbody tr.seleccionado {
+            background: rgba(37, 99, 235, 0.16) !important;
+        }
+
+        tbody tr:focus-visible {
+            outline: 3px solid rgba(37, 99, 235, 0.45);
+            outline-offset: -3px;
+        }
+
+        @media (max-width: 720px) {
+            main {
+                padding: 1.8rem 1.2rem 2.5rem;
+            }
+
+            th, td {
+                font-size: 0.85rem;
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -256,35 +387,79 @@
     </div>
 
     <div id="contenido" hidden>
-        <div class="status-bar">
-            <article class="status-card">
-                <h3>Total de espacios</h3>
-                <strong id="totalEspacios">0</strong>
-                <span>Registros en la base de datos</span>
-            </article>
-            <article class="status-card">
-                <h3>Laboratorios</h3>
-                <strong id="totalLaboratorios">0</strong>
-                <span>Incluye laboratorios especializados</span>
-            </article>
-            <article class="status-card">
-                <h3>Salones y otros</h3>
-                <strong id="totalSalones">0</strong>
-                <span>Espacios para docencia y actividades</span>
-            </article>
+        <div class="layout">
+            <div>
+                <div class="status-bar">
+                    <article class="status-card">
+                        <h3>Total de espacios</h3>
+                        <strong id="totalEspacios">0</strong>
+                        <span>Registros en la base de datos</span>
+                    </article>
+                    <article class="status-card">
+                        <h3>Laboratorios</h3>
+                        <strong id="totalLaboratorios">0</strong>
+                        <span>Incluye laboratorios especializados</span>
+                    </article>
+                    <article class="status-card">
+                        <h3>Salones y otros</h3>
+                        <strong id="totalSalones">0</strong>
+                        <span>Espacios para docencia y actividades</span>
+                    </article>
+                </div>
+
+                <ul id="listaCategorias" class="category-list"></ul>
+
+                <section>
+                    <h3>Laboratorios</h3>
+                    <div id="tablaLaboratorios"></div>
+                </section>
+
+                <section>
+                    <h3>Salones y otros espacios</h3>
+                    <div id="tablaSalones"></div>
+                </section>
+            </div>
+
+            <aside id="panelReserva" class="reservation-panel" hidden>
+                <h2>Crear reserva</h2>
+                <p id="espacioSeleccionado" class="seleccion" hidden></p>
+                <form id="formReserva">
+                    <label>
+                        ID de usuario
+                        <input type="number" name="usuarioId" min="1" required>
+                    </label>
+                    <label>
+                        ID del espacio
+                        <input type="number" name="espacioId" min="1" required readonly>
+                    </label>
+                    <label>
+                        ID del bloque
+                        <input type="number" name="bloqueId" min="1" required>
+                    </label>
+                    <label>
+                        ID del curso
+                        <input type="number" name="cursoId" min="1" required>
+                    </label>
+                    <label>
+                        Fecha de reserva
+                        <input type="date" name="fechaReserva" required>
+                    </label>
+                    <label>
+                        Descripción del uso
+                        <textarea name="descripcionUso" rows="4" placeholder="Motivo de la reserva"></textarea>
+                    </label>
+                    <label>
+                        Cantidad de estudiantes
+                        <input type="number" name="cantidadEstudiantes" min="1" value="1" required>
+                    </label>
+                    <button type="submit">Enviar solicitud</button>
+                </form>
+                <div id="resultadoReserva" class="resultado" hidden>
+                    <strong id="estadoReserva"></strong>
+                    <pre id="detalleReserva"></pre>
+                </div>
+            </aside>
         </div>
-
-        <ul id="listaCategorias" class="category-list"></ul>
-
-        <section>
-            <h3>Laboratorios</h3>
-            <div id="tablaLaboratorios"></div>
-        </section>
-
-        <section>
-            <h3>Salones y otros espacios</h3>
-            <div id="tablaSalones"></div>
-        </section>
     </div>
 </main>
 
@@ -300,6 +475,18 @@
     const listaCategorias = document.getElementById('listaCategorias');
     const tablaLaboratorios = document.getElementById('tablaLaboratorios');
     const tablaSalones = document.getElementById('tablaSalones');
+
+    const panelReserva = document.getElementById('panelReserva');
+    const espacioSeleccionadoEl = document.getElementById('espacioSeleccionado');
+    const formReserva = document.getElementById('formReserva');
+    const inputEspacioId = formReserva?.querySelector('input[name="espacioId"]');
+    const resultadoReserva = document.getElementById('resultadoReserva');
+    const estadoReserva = document.getElementById('estadoReserva');
+    const detalleReserva = document.getElementById('detalleReserva');
+
+    const LAB_REGEX = /laboratorio/i;
+    let filaSeleccionada = null;
+    let espacioSeleccionadoActual = null;
 
     const LAB_REGEX = /laboratorio/i;
 
@@ -403,6 +590,7 @@
         const tbody = document.createElement('tbody');
         datos.forEach(espacio => {
             const fila = document.createElement('tr');
+            fila.tabIndex = 0;
             fila.innerHTML = `
                 <td>${sanear(espacio.codigo)}</td>
                 <td>${sanear(espacio.nombre)}</td>
@@ -411,6 +599,16 @@
                 <td>${sanear(espacio.equipamiento)}</td>
                 <td>${espacio.escuelaId ?? '—'}</td>
                 <td>${formatearEstado(espacio.estado)}</td>`;
+
+
+            fila.addEventListener('click', () => seleccionarEspacio(espacio, fila));
+            fila.addEventListener('keydown', (evento) => {
+                if (evento.key === 'Enter' || evento.key === ' ') {
+                    evento.preventDefault();
+                    seleccionarEspacio(espacio, fila);
+                }
+            });
+
             tbody.appendChild(fila);
         });
 
@@ -418,6 +616,36 @@
         tabla.appendChild(tbody);
         contenedor.innerHTML = '';
         contenedor.appendChild(tabla);
+    }
+     function seleccionarEspacio(espacio, fila) {
+        if (!formReserva || !inputEspacioId) {
+            return;
+        }
+
+        if (filaSeleccionada) {
+            filaSeleccionada.classList.remove('seleccionado');
+        }
+
+        filaSeleccionada = fila;
+        filaSeleccionada.classList.add('seleccionado');
+        espacioSeleccionadoActual = espacio;
+
+        inputEspacioId.value = espacio.id ?? '';
+
+        if (espacio.nombre) {
+            espacioSeleccionadoEl.hidden = false;
+            espacioSeleccionadoEl.textContent = `Reservando: ${espacio.nombre} (${espacio.codigo ?? 'sin código'})`;
+        } else if (espacio.id) {
+            espacioSeleccionadoEl.hidden = false;
+            espacioSeleccionadoEl.textContent = `Reservando espacio con ID #${espacio.id}`;
+        } else {
+            espacioSeleccionadoEl.hidden = true;
+            espacioSeleccionadoEl.textContent = '';
+        }
+
+        resultadoReserva.hidden = true;
+        panelReserva.hidden = false;
+        panelReserva.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function formatearEstado(estado) {
@@ -435,6 +663,53 @@
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
     }
+
+     if (formReserva) {
+        formReserva.addEventListener('submit', async (evento) => {
+            evento.preventDefault();
+            resultadoReserva.hidden = true;
+
+            const datos = Object.fromEntries(new FormData(formReserva).entries());
+            datos.usuarioId = Number(datos.usuarioId);
+            datos.espacioId = Number(datos.espacioId);
+            datos.bloqueId = Number(datos.bloqueId);
+            datos.cursoId = Number(datos.cursoId);
+            datos.cantidadEstudiantes = Number(datos.cantidadEstudiantes);
+
+            try {
+                const respuesta = await fetch('/api/reservas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                const payload = await respuesta.json();
+                resultadoReserva.hidden = false;
+
+                if (respuesta.ok) {
+                    resultadoReserva.className = 'resultado exito';
+                    estadoReserva.textContent = 'Reserva creada correctamente';
+                    detalleReserva.textContent = JSON.stringify(payload, null, 2);
+                    formReserva.reset();
+                    if (inputEspacioId && espacioSeleccionadoActual) {
+                        inputEspacioId.value = espacioSeleccionadoActual.id ?? '';
+                    }
+                } else {
+                    resultadoReserva.className = 'resultado error';
+                    estadoReserva.textContent = 'Error al crear la reserva';
+                    detalleReserva.textContent = JSON.stringify(payload, null, 2);
+                }
+            } catch (error) {
+                resultadoReserva.hidden = false;
+                resultadoReserva.className = 'resultado error';
+                estadoReserva.textContent = 'Error en la comunicación con el backend';
+                detalleReserva.textContent = error.toString();
+            }
+        });
+    }
+
 
     cargarEspacios();
 </script>
