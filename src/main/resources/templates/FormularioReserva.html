@@ -1,10 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Registrar reserva</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+        }
+        form {
+            max-width: 480px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        label {
+            display: flex;
+            flex-direction: column;
+            font-weight: bold;
+        }
+        input, textarea, button {
+            font-size: 1rem;
+            padding: 0.5rem;
+        }
+        button {
+            cursor: pointer;
+        }
+        .resultado {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        .exito {
+            background-color: #e6ffed;
+            border: 1px solid #2ecc71;
+        }
+        .error {
+            background-color: #ffe6e6;
+            border: 1px solid #e74c3c;
+        }
+        pre {
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 <body>
+<h1>Formulario de reserva</h1>
+<p>Completa los datos y envía la solicitud. El estado inicial será <strong>Pendiente</strong>.</p>
+<form id="formReserva">
+    <label>
+        ID de usuario
+        <input type="number" name="usuarioId" min="1" required>
+    </label>
+    <label>
+        ID de espacio
+        <input type="number" name="espacioId" min="1" required>
+    </label>
+    <label>
+        ID de bloque
+        <input type="number" name="bloqueId" min="1" required>
+    </label>
+    <label>
+        ID de curso
+        <input type="number" name="cursoId" min="1" required>
+    </label>
+    <label>
+        Fecha de reserva
+        <input type="date" name="fechaReserva" required>
+    </label>
+    <label>
+        Descripción del uso
+        <textarea name="descripcionUso" rows="4" placeholder="Motivo de la reserva"></textarea>
+    </label>
+    <label>
+        Cantidad de estudiantes
+        <input type="number" name="cantidadEstudiantes" min="1" value="1" required>
+    </label>
+    <button type="submit">Enviar</button>
+</form>
+<div id="resultado" class="resultado" hidden>
+    <strong id="estado"></strong>
+    <pre id="detalle"></pre>
+</div>
+<script>
+    const form = document.getElementById('formReserva');
+    const resultado = document.getElementById('resultado');
+    const estado = document.getElementById('estado');
+    const detalle = document.getElementById('detalle');
 
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const datos = Object.fromEntries(new FormData(form).entries());
+        datos.usuarioId = Number(datos.usuarioId);
+        datos.espacioId = Number(datos.espacioId);
+        datos.bloqueId = Number(datos.bloqueId);
+        datos.cursoId = Number(datos.cursoId);
+        datos.cantidadEstudiantes = Number(datos.cantidadEstudiantes);
+
+        try {
+            const respuesta = await fetch('/api/reservas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            });
+
+            const payload = await respuesta.json();
+            resultado.hidden = false;
+
+            if (respuesta.ok) {
+                resultado.className = 'resultado exito';
+                estado.textContent = 'Reserva creada correctamente';
+                detalle.textContent = JSON.stringify(payload, null, 2);
+                form.reset();
+            } else {
+                resultado.className = 'resultado error';
+                estado.textContent = 'Error al crear la reserva';
+                detalle.textContent = JSON.stringify(payload, null, 2);
+            }
+        } catch (error) {
+            resultado.hidden = false;
+            resultado.className = 'resultado error';
+            estado.textContent = 'Error en la comunicación con el backend';
+            detalle.textContent = error.toString();
+        }
+    });
+</script>
 </body>
+</html>
 </html>
