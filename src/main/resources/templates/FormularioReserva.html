@@ -42,11 +42,19 @@
         pre {
             white-space: pre-wrap;
         }
+         .seleccion {
+            margin-top: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-left: 4px solid #4263eb;
+            background-color: #edf2ff;
+            color: #273c75;
+        }
     </style>
 </head>
 <body>
 <h1>Formulario de reserva</h1>
 <p>Completa los datos y envía la solicitud. El estado inicial será <strong>Pendiente</strong>.</p>
+<p id="espacioSeleccionado" class="seleccion" hidden></p>
 <form id="formReserva">
     <label>
         ID de usuario
@@ -87,6 +95,24 @@
     const resultado = document.getElementById('resultado');
     const estado = document.getElementById('estado');
     const detalle = document.getElementById('detalle');
+     const espacioSeleccionado = document.getElementById('espacioSeleccionado');
+    const inputEspacio = form.querySelector('input[name="espacioId"]');
+
+    const params = new URLSearchParams(window.location.search);
+    const espacioId = params.get('espacioId');
+    const espacioNombre = params.get('espacioNombre');
+
+    if (espacioId) {
+        inputEspacio.value = espacioId;
+    }
+
+    if (espacioNombre) {
+        espacioSeleccionado.hidden = false;
+        espacioSeleccionado.textContent = `Estás reservando el espacio: ${espacioNombre}`;
+    } else if (espacioId) {
+        espacioSeleccionado.hidden = false;
+        espacioSeleccionado.textContent = `Estás reservando el espacio con ID #${espacioId}`;
+    }
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
